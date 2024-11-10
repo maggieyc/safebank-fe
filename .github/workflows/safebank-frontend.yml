@@ -74,7 +74,7 @@ jobs:
         uses: Azure/static-web-apps-deploy@v1
         with:
           action: "upload"
-          app_location: "/dist-dev"
+          app_location: "dist-dev"
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_DEV }}
     
 
@@ -97,5 +97,5 @@ jobs:
         uses: Azure/static-web-apps-deploy@v1
         with:
           action: "upload"
-          app_location: "/dist-uat"
+          app_location: "dist-uat"
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_UAT }}
