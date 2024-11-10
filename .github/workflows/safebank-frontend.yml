@@ -68,13 +68,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app-dev
+          path: ./dist-dev
       
       - name: 'Deploy to Azure Static Web App'
         id: deploy-to-static-webapp
         uses: Azure/static-web-apps-deploy@v1
         with:
           action: "upload"
-          app_location: "dist-dev"
+          app_location: "./dist-dev"
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_DEV }}
     
 
@@ -91,11 +92,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app-uat
+          path: ./dist-uat
       
       - name: 'Deploy to Azure Static Web App'
         id: deploy-to-static-webapp
         uses: Azure/static-web-apps-deploy@v1
         with:
           action: "upload"
-          app_location: "dist-uat"
+          app_location: "./dist-uat"
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_UAT }}
