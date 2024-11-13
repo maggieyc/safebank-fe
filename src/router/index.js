@@ -2,7 +2,11 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../components/Home.vue'
 import Skull from '../components/Skull.vue'
+import ClientSignup from '../components/ClientSignup.vue'
+import ClientLogin from '../components/ClientLogin.vue'
+import AdminLogin from '../components/AdminLogin.vue'
 import AppAccounts from '../components/AppAccounts.vue'
+import UserSpace from '../components/UserSpace.vue'
 
 Vue.use(VueRouter)
 
@@ -18,9 +22,29 @@ const routes = [
     component: Skull
   },
   {
+    path: '/clientsignup',
+    name: 'ClientSignup',
+    component: ClientSignup
+  },
+  {
+    path: '/clientlogin',
+    name: 'ClientLogin',
+    component: ClientLogin
+  },
+  {
+    path: '/adminlogin',
+    name: 'AdminLogin',
+    component: AdminLogin
+  },
+  {
     path: '/accounts',
     name: 'AppAccounts',
     component: AppAccounts
+  },
+  {
+    path: '/userspace',
+    name: 'UserSpace',
+    component: UserSpace
   }
 ]
 
