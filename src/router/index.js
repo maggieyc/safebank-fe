@@ -42,7 +42,7 @@ const routes = [
     component: AppAccounts
   },
   {
-    path: '/userspace',
+    path: '/userspace/:username',
     name: 'UserSpace',
     component: UserSpace
   }

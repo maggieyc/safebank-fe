@@ -3,17 +3,27 @@
     <div class="container">
       <div class="row">
         <div class="col-sm-12">
-          <h1>Your Account</h1>
+          <h1>User Accounts</h1>
           <hr />
           <br />
+          <!-- Allert Message -->
+          <b-alert v-if="showMessage" variant="success" show>{{
+            message
+          }}</b-alert>
+          <!-- b-alert v-if="error" variant="danger" show>{{ error }}</b-alert-->
 
-          <!-- Alert Message -->
-          <b-alert v-if="showMessage" variant="success" show>{{ message }}</b-alert>
-
-          <!-- Account Table -->
+          <button
+            type="button"
+            class="btn btn-success btn-sm"
+            v-b-modal.transfer-modal
+          >
+            Transfer
+          </button>
+          <br /><br />
           <table class="table table-hover">
             <thead>
               <tr>
+                <th scope="col">Username</th>
                 <th scope="col">Account Name</th>
                 <th scope="col">Account Number</th>
                 <th scope="col">Account Balance</th>
@@ -24,7 +34,8 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-if="account">
+              <tr v-for="account in accounts" :key="account.id">
+                <td>{{ account.username }}</td>
                 <td>{{ account.name }}</td>
                 <td>{{ account.account_number }}</td>
                 <td>{{ account.balance }}</td>
@@ -36,68 +47,90 @@
                     class="badge badge-success"
                     >{{ account.status }}</span
                   >
-                  <span v-else class="badge badge-danger">{{ account.status }}</span>
-                </td>
-                <td>
-                  <button
-                    type="button"
-                    class="btn btn-info btn-sm"
-                    v-b-modal.edit-account-modal
-                    @click="editAccount(account)"
-                  >
-                    Edit
-                  </button>
+                  <span v-else class="badge badge-danger">{{
+                    account.status
+                  }}</span>
                 </td>
               </tr>
             </tbody>
           </table>
-
           <footer class="text-center">
             Copyright &copy; All Rights Reserved.
           </footer>
         </div>
       </div>
-
-      <!-- Modal for Edit Account -->
       <b-modal
-        ref="editAccountModal"
-        id="edit-account-modal"
-        title="Edit Account"
+        ref="transferModal"
+        id="transfer-modal"
+        title="Transfer Money"
         hide-backdrop
         hide-footer
       >
-        <b-form @submit="onSubmitUpdate" class="w-100">
+        <b-form @submit="onSubmit" class="w-100">
           <b-form-group
-            id="form-edit-name-group"
-            label="Account Name:"
-            label-for="form-edit-name-input"
+            id="form-source-group"
+            label="Source Account Number:"
+            label-for="form-source-input"
           >
             <b-form-input
-              id="form-edit-name-input"
+              id="form-source-input"
               type="text"
-              v-model="editAccountForm.name"
-              placeholder="Account Name"
+              v-model="transfer.source"
+              placeholder="Source Account"
               required
-            ></b-form-input>
-          </b-form-group>
-          <b-form-group
-            id="form-edit-country-group"
-            label="Country:"
-            label-for="form-edit-country-input"
-          >
-            <b-form-input
-              id="form-edit-country-input"
-              type="text"
-              v-model="editAccountForm.country"
-              placeholder="Enter Country"
-              required
-            ></b-form-input>
+            >
+            </b-form-input>
           </b-form-group>
 
-          <b-button type="submit" variant="outline-info">Update</b-button>
+          <b-form-group
+            id="form-Target-group"
+            label="Target Account Number:"
+            label-for="form-Target-input"
+          >
+            <b-form-input
+              id="form-Target-input"
+              type="text"
+              v-model="transfer.target"
+              placeholder="Target Account"
+              required
+            >
+            </b-form-input>
+          </b-form-group>
+
+          <b-form-group
+            id="form-currency-group"
+            label="Currency:"
+            label-for="form-currency-input"
+          >
+            <b-form-input
+              id="form-currency-input"
+              type="text"
+              v-model="transfer.currency"
+              placeholder="$ or €"
+              required
+            >
+            </b-form-input>
+          </b-form-group>
+
+          <b-form-group
+            id="form-amount-group"
+            label="Amount:"
+            label-for="form--input"
+          >
+            <b-form-input
+              id="form-amount-input"
+              type="text"
+              v-model="transfer.amount"
+              placeholder="Enter Amount"
+              required
+            >
+            </b-form-input>
+          </b-form-group>
+
+          <b-button type="submit" variant="outline-info">Submit</b-button>
         </b-form>
       </b-modal>
-      <!-- End of Modal for Edit Account -->
+      <!-- End of Modal for Transfer-->
     </div>
   </div>
 </template>
@@ -105,17 +138,19 @@
 <script>
 import axios from "axios";
 export default {
-  name: "UserAccount",
+  name: "Account",
   data() {
     return {
-      account: null, // Change to store only the user's account
-      editAccountForm: {
-        id: "",
-        name: "",
-        country: "",
-      },
+      username: this.$route.params.username,  // Accessing username from route params
+      accounts: [],
       showMessage: false,
       message: "",
+      transfer:{
+        username: "",
+        source: "",
+        target: "",
+        amount: "",
+      }
     };
   },
   methods: {
@@ -123,71 +158,80 @@ export default {
      * RESTful requests
      ***************************************************/
 
-    // GET function to fetch the logged-in user's account
-    RESTgetAccount() {
-      const path = `${process.env.VUE_APP_ROOT_URL}/account`; // Adjust API endpoint to fetch only the user's account
+    //GET function
+    RESTgetUserAccounts() {
+      const path = `${process.env.VUE_APP_ROOT_URL}/userspace/${this.username}/accounts`;
       axios
         .get(path)
         .then((response) => {
-          this.account = response.data.account;
+          this.accounts = response.data.accounts;
         })
         .catch((error) => {
           console.error(error);
         });
     },
 
-    // Update function
-    RESTupdateAccount(payload, accountId) {
-      const path = `${process.env.VUE_APP_ROOT_URL}/accounts/${accountId}`;
+    // Transfer Money
+    RESTtransferMoney(payload, username){
+      const path = `${process.env.VUE_APP_ROOT_URL}/userspace/${username}/transfer`;
       axios
         .put(path, payload)
         .then((response) => {
-          this.RESTgetAccount();
-          this.message = "Account Updated successfully!";
+          // show updated account
+          // this.RESTgetAccounts();
+
+          // For message alert
+          this.message = "Transfer Made Successfuly!";
+          // To actually show the message
           this.showMessage = true;
+          // To hide the message after 3 seconds
           setTimeout(() => {
             this.showMessage = false;
           }, 3000);
         })
         .catch((error) => {
+
+          // For message alert
+          this.message = "Transfer Not Completed.";
+          // To actually show the message
+          this.showMessage = true;
+          // To hide the message after 3 seconds
+          setTimeout(() => {
+            this.showMessage = false;
+          }, 3000);
+
           console.error(error);
-          this.RESTgetAccount();
+          this.RESTgetUserAccounts();
         });
     },
 
     /***************************************************
      * FORM MANAGEMENT
-     ***************************************************/
+     * *************************************************/
 
+    // Initialize forms empty
     initForm() {
-      this.editAccountForm.id = "";
-      this.editAccountForm.name = "";
-      this.editAccountForm.country = "";
+      this.transfer.source = "";
+      this.transfer.target = "";
+      this.transfer.amount = "";
     },
 
-    // Handle submit event for editing account
-    onSubmitUpdate(e) {
-      e.preventDefault();
-      this.$refs.editAccountModal.hide();
-      const payload = {
-        name: this.editAccountForm.name,
-        country: this.editAccountForm.country,
-      };
-      this.RESTupdateAccount(payload, this.editAccountForm.id);
+    // Handle transfer form button
+    onSubmitTransfer(e) {
+      e.preventDefault(); //prevent default form submit form the browser
+      this.$refs.transferModal.hide(); //hide the modal when submitted
+
+      this.RESTtransferMoney(this.transfer, this.transfer.username);
       this.initForm();
-    },
-
-    // Handle edit button click
-    editAccount(account) {
-      this.editAccountForm = account;
     },
   },
 
   /***************************************************
-   * LIFECYCLE HOOKS
+   * LIFECYClE HOOKS
    ***************************************************/
   created() {
-    this.RESTgetAccount(); // Fetch the user's account when the component is created
+    this.RESTgetUserAccounts(); 
   },
 };
 </script>
+

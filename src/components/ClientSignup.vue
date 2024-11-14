@@ -6,13 +6,9 @@
       <form @submit.prevent="handleSubmit">
         <div class="form-group">
           <label for="name">Username</label>
-          <input type="text" id="name" v-model="name" required />
+          <input type="text" id="name" v-model="username" required />
         </div>
 
-        <div class="form-group">
-          <label for="country">Country of Origin</label>
-          <input type="text" id="country" v-model="country" required />
-        </div>
 
         <div class="form-group">
           <label for="password">Password</label>
@@ -40,8 +36,7 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      name: '',
-      country: '',
+      username: '',
       password: '',
       repeatPassword: ''
     };
@@ -65,12 +60,11 @@ export default {
         const hashedPassword = await this.hashPassword(this.password);
         
         const userData = {
-          name: this.name,
-          country: this.country,
+          username: this.username,
           password: hashedPassword
         };
-
-        const response = await axios.post(`http://localhost:5000/accounts`, userData);
+         const path = `${process.env.VUE_APP_ROOT_URL}/users`;
+        const response = await axios.post(path, userData);
         /*const response = await axios.post(`${process.env.VUE_APP_BACKEND_URL}/accounts`, userData);
 
         const response = await axios.post(`${process.env.VUE_APP_BACKEND_URL}/accounts`, userData, {

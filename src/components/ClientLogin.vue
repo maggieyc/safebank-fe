@@ -54,13 +54,13 @@ export default {
       console.log('Submitting user data:', userData);
 
       try {
-        const response = await axios.post(`${process.env.VUE_APP_BACKEND_URL}/clientlogin`, userData, {
+
+        const response = await axios.post(`${process.env.VUE_APP_ROOT_URL}/clientlogin`, userData, {
           headers: {
             "Content-Type": "application/json"
           }
         });
-        
-        
+
         alert(response.data.message); //success
 
       } catch (error) {

@@ -23,6 +23,7 @@
           <table class="table table-hover">
             <thead>
               <tr>
+                <th scope="col">Username </th>
                 <th scope="col">Account Name</th>
                 <th scope="col">Account Number</th>
                 <th scope="col">Account Balance</th>
@@ -34,6 +35,7 @@
             </thead>
             <tbody>
               <tr v-for="account in accounts" :key="account.id">
+                <td>{{ account.username }}</td>
                 <td>{{ account.name }}</td>
                 <td>{{ account.account_number }}</td>
                 <td>{{ account.balance }}</td>
@@ -84,6 +86,22 @@
         hide-footer
       >
         <b-form @submit="onSubmit" class="w-100">
+
+          <b-form-group
+            id="form-name-group"
+            label="Username:"
+            label-for="form-username-input"
+          >
+            <b-form-input
+              id="form-username-input"
+              type="text"
+              v-model="createAccountForm.username"
+              placeholder="Username"
+              required
+            >
+            </b-form-input>
+          </b-form-group>
+
           <b-form-group
             id="form-name-group"
             label="Account Name:"
@@ -188,6 +206,7 @@ export default {
         name: "",
         currency: "",
         country: "",
+        username: "",
       },
       editAccountForm: {
         id: "",
@@ -290,6 +309,7 @@ export default {
     initForm() {
       this.createAccountForm.name = "";
       this.createAccountForm.currency = "";
+      this.createAccountForm.username = "";
       this.editAccountForm.id = "";
       this.editAccountForm.name = "";
       this.editAccountForm.country = "";
@@ -302,6 +322,7 @@ export default {
       const payload = {
         name: this.createAccountForm.name,
         currency: this.createAccountForm.currency,
+        username: this.createAccountForm.username,
         country: this.createAccountForm.country,
       };
       this.RESTcreateAccount(payload);
