@@ -172,7 +172,7 @@ export default {
     },
 
     // Transfer Money
-    RESTtransferMoney(payload, username){
+    RESTtransferMoney(payload){
       const path = `${process.env.VUE_APP_ROOT_URL}/userspace/${this.username}/transfer`;
       axios
         .put(path, payload)
@@ -214,6 +214,7 @@ export default {
       this.transfer.source = "";
       this.transfer.target = "";
       this.transfer.amount = "";
+      this.transfer.currency = "";
     },
 
     // Handle transfer form button
@@ -221,7 +222,7 @@ export default {
       e.preventDefault(); //prevent default form submit form the browser
       this.$refs.transferModal.hide(); //hide the modal when submitted
 
-      this.RESTtransferMoney(this.transfer, this.transfer.username);
+      this.RESTtransferMoney(this.transfer);
       this.initForm();
     },
   },
