@@ -66,7 +66,7 @@
         hide-backdrop
         hide-footer
       >
-        <b-form @submit="onSubmit" class="w-100">
+        <b-form @submit="onSubmitTransfer" class="w-100">
           <b-form-group
             id="form-source-group"
             label="Source Account Number:"
@@ -146,9 +146,9 @@ export default {
       showMessage: false,
       message: "",
       transfer:{
-        username: "",
         source: "",
         target: "",
+        currency: "",
         amount: "",
       }
     };
@@ -173,12 +173,12 @@ export default {
 
     // Transfer Money
     RESTtransferMoney(payload, username){
-      const path = `${process.env.VUE_APP_ROOT_URL}/userspace/${username}/transfer`;
+      const path = `${process.env.VUE_APP_ROOT_URL}/userspace/${this.username}/transfer`;
       axios
         .put(path, payload)
         .then((response) => {
           // show updated account
-          // this.RESTgetAccounts();
+          this.RESTgetUserAccounts();
 
           // For message alert
           this.message = "Transfer Made Successfuly!";
