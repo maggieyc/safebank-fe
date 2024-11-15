@@ -20,6 +20,8 @@
             Transfer
           </button>
           <br /><br />
+
+          <h2>Accounts</h2>
           <table class="table table-hover">
             <thead>
               <tr>
@@ -51,14 +53,105 @@
                     account.status
                   }}</span>
                 </td>
+
+                <td>
+                  <div class="btn-group" role="group">
+                    <button
+                      type="button"
+                      class="btn btn-info btn-sm"
+                      v-b-modal.edit-account-modal
+                      @click="editAccount(account)"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-danger btn-sm"
+                      @click="deleteAccount(account)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>
+
+          <!-- Transaction Log -->
+          <h2>Transactions</h2>
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">Made By</th>
+                <th scope="col">Source Account</th>
+                <th scope="col">Target Account</th>
+                <th scope="col">Currency</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="transaction in transactions" :key="transaction.id">
+                <td>{{ transaction.username }}</td>
+                <td>{{ transaction.source_account }}</td>
+                <td>{{ transaction.target_account }}</td>
+                <td>{{ transaction.currency }}</td>
+                <td>{{ transaction.amount }}</td>
+                <td>{{ transaction.created_at }}</td>
+              </tr>
+            </tbody>
+          </table>
+
           <footer class="text-center">
             Copyright &copy; All Rights Reserved.
           </footer>
         </div>
       </div>
+
+
+      <!-- Start of Modal for Edit Account-->
+      <b-modal
+        ref="editAccountModal"
+        id="edit-account-modal"
+        title="Edit the account"
+        hide-backdrop
+        hide-footer
+      >
+        <b-form @submit="onSubmitUpdate" class="w-100">
+          <b-form-group
+            id="form-edit-name-group"
+            label="Account Name:"
+            label-for="form-edit-name-input"
+          >
+            <b-form-input
+              id="form-edit-name-input"
+              type="text"
+              v-model="editAccountForm.name"
+              placeholder="Account Name"
+              required
+            >
+            </b-form-input>
+          </b-form-group>
+          <b-form-group 
+            id="form-edit-country-group" 
+            label="Country:" 
+            label-for="form-edit-country-input"
+          >
+            <b-form-input
+              id="form-edit-country-input"
+              type="text"
+              v-model="editAccountForm.country"
+              placeholder="Enter Country"
+              required
+            >
+            </b-form-input>
+          </b-form-group>
+
+          <b-button type="submit" variant="outline-info">Update</b-button>
+        </b-form>
+      </b-modal>
+      <!-- End of Modal for Edit Account-->
+
       <b-modal
         ref="transferModal"
         id="transfer-modal"
@@ -143,6 +236,7 @@ export default {
     return {
       username: this.$route.params.username,  // Accessing username from route params
       accounts: [],
+      transactions: [],
       showMessage: false,
       message: "",
       transfer:{
@@ -150,7 +244,12 @@ export default {
         target: "",
         currency: "",
         amount: "",
-      }
+      },
+      editAccountForm: {
+        id: "",
+        name: "",
+        country: "",
+      },
     };
   },
   methods: {
@@ -158,7 +257,7 @@ export default {
      * RESTful requests
      ***************************************************/
 
-    //GET function
+    //GET accounts function
     RESTgetUserAccounts() {
       const path = `${process.env.VUE_APP_ROOT_URL}/userspace/${this.username}/accounts`;
       axios
@@ -171,6 +270,63 @@ export default {
         });
     },
 
+    //GET transactions function
+    RESTgetUserTransactions() {
+      const path = `${process.env.VUE_APP_ROOT_URL}/userspace/${this.username}/transactions`;
+      axios
+        .get(path)
+        .then((response) => {
+          this.transactions = response.data.transactions;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+
+    // Update function
+    RESTupdateAccount(payload, accountId) {
+      const path = `${process.env.VUE_APP_ROOT_URL}/accounts/${accountId}`;
+      axios
+        .put(path, payload)
+        .then((response) => {
+          this.RESTgetUserAccounts();
+          // For message alert
+          this.message = "Account Updated succesfully!";
+          // To actually show the message
+          this.showMessage = true;
+          // To hide the message after 3 seconds
+          setTimeout(() => {
+            this.showMessage = false;
+          }, 3000);
+        })
+        .catch((error) => {
+          console.error(error);
+          this.RESTgetUserAccounts();
+        });
+    },
+
+    // Delete account
+    RESTdeleteAccount(accountId) {
+      const path = `${process.env.VUE_APP_ROOT_URL}/accounts/${accountId}`;
+      axios
+        .delete(path)
+        .then((response) => {
+          this.RESTgetUserAccounts();
+          // For message alert
+          this.message = "Account Deleted succesfully!";
+          // To actually show the message
+          this.showMessage = true;
+          // To hide the message after 3 seconds
+          setTimeout(() => {
+            this.showMessage = false;
+          }, 3000);
+        })
+        .catch((error) => {
+          console.error(error);
+          this.RESTgetUserAccounts();
+        });
+    },
+
     // Transfer Money
     RESTtransferMoney(payload){
       const path = `${process.env.VUE_APP_ROOT_URL}/userspace/${this.username}/transfer`;
@@ -179,6 +335,7 @@ export default {
         .then((response) => {
           // show updated account
           this.RESTgetUserAccounts();
+          this.RESTgetUserTransactions();
 
           // For message alert
           this.message = "Transfer Made Successfuly!";
@@ -205,6 +362,28 @@ export default {
         });
     },
 
+    // Handle submit event for edit account
+    onSubmitUpdate(e) {
+      e.preventDefault(); //prevent default form submit form the browser
+      this.$refs.editAccountModal.hide(); //hide the modal when submitted
+      const payload = {
+        name: this.editAccountForm.name,
+        country: this.editAccountForm.country,
+      };
+      this.RESTupdateAccount(payload, this.editAccountForm.id);
+      this.initForm();
+    },
+
+    // Handle edit button
+    editAccount(account) {
+      this.editAccountForm = account;
+    },
+
+    // Handle Delete button
+    deleteAccount(account) {
+      this.RESTdeleteAccount(account.id);
+    },
+
     /***************************************************
      * FORM MANAGEMENT
      * *************************************************/
@@ -215,6 +394,9 @@ export default {
       this.transfer.target = "";
       this.transfer.amount = "";
       this.transfer.currency = "";
+      this.editAccountForm.id = "";
+      this.editAccountForm.name = "";
+      this.editAccountForm.country = "";
     },
 
     // Handle transfer form button
@@ -232,6 +414,7 @@ export default {
    ***************************************************/
   created() {
     this.RESTgetUserAccounts(); 
+    this.RESTgetUserTransactions();
   },
 };
 </script>

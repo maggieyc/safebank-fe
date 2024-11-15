@@ -73,6 +73,33 @@
               </tr>
             </tbody>
           </table>
+
+          <!-- Transaction Log -->
+          <h2>Transactions</h2>
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">Made By</th>
+                <th scope="col">Source Account</th>
+                <th scope="col">Target Account</th>
+                <th scope="col">Currency</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="transaction in transactions" :key="transaction.id">
+                <td>{{ transaction.username }}</td>
+                <td>{{ transaction.source_account }}</td>
+                <td>{{ transaction.target_account }}</td>
+                <td>{{ transaction.currency }}</td>
+                <td>{{ transaction.amount }}</td>
+                <td>{{ transaction.created_at }}</td>
+              </tr>
+            </tbody>
+          </table>
+
+
           <footer class="text-center">
             Copyright &copy; All Rights Reserved.
           </footer>
@@ -202,6 +229,7 @@ export default {
   data() {
     return {
       accounts: [],
+      transactions: [],
       createAccountForm: {
         name: "",
         currency: "",
@@ -222,6 +250,8 @@ export default {
      * RESTful requests
      ***************************************************/
 
+
+    
     //GET function
     RESTgetAccounts() {
       const path = `${process.env.VUE_APP_ROOT_URL}/accounts`;
@@ -229,6 +259,18 @@ export default {
         .get(path)
         .then((response) => {
           this.accounts = response.data.accounts;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+
+    RESTgetTransactions() {
+      const path = `${process.env.VUE_APP_ROOT_URL}/transactions`;
+      axios
+        .get(path)
+        .then((response) => {
+          this.transactions = response.data.transactions;
         })
         .catch((error) => {
           console.error(error);
@@ -357,6 +399,7 @@ export default {
    ***************************************************/
   created() {
     this.RESTgetAccounts();
+    this.RESTgetTransactions();
   },
 };
 </script>
