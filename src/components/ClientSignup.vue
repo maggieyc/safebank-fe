@@ -9,7 +9,6 @@
           <input type="text" id="name" v-model="username" required />
         </div>
 
-
         <div class="form-group">
           <label for="password">Password</label>
           <input type="password" id="password" v-model="password" required />
@@ -25,7 +24,7 @@
 
       <p class="login-link">
         Already have an account? <a href="/clientlogin">Log in here.</a>
-        <div class = "back"> Go back to the <a href="/">Homepage</a>.</div>
+        <div class="back"> Go back to the <a href="/">Homepage</a>.</div>
       </p>
     </div>
   </div>
@@ -42,51 +41,33 @@ export default {
     };
   },
   methods: {
-    async hashPassword(password) {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(password);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    },
     async handleSubmit() {
-
       if (this.password !== this.repeatPassword) {
         alert('Passwords do not match!');
         return;
       }
 
       try {
-        const hashedPassword = await this.hashPassword(this.password);
-        
         const userData = {
           username: this.username,
-          password: hashedPassword
+          password: this.password
         };
-         const path = `${process.env.VUE_APP_ROOT_URL}/users`;
-        const response = await axios.post(path, userData);
-        /*const response = await axios.post(`${process.env.VUE_APP_BACKEND_URL}/accounts`, userData);
-
-        const response = await axios.post(`${process.env.VUE_APP_BACKEND_URL}/accounts`, userData, {
-            headers: {
-                "Content-Type": "application/json"
-            }
-        });*/
-
+        const response = await axios.post('http://localhost:5000/users', userData);
 
         console.log('Signup response:', response.data);
-        
         alert('Signup successful');
-        
-        this.$router.push('/clientlogin'); 
-        
-        this.name = '';
-        this.country = '';
+
+        // Reset form fields
+        this.username = '';
         this.password = '';
         this.repeatPassword = '';
+
+        // Redirect to login page
+        this.$router.push('/clientlogin');
       } catch (error) {
         console.error('Error during signup:', error);
-        alert('Signup failed');
+        const errorMessage = error.response?.data?.message || 'Signup failed';
+        alert(errorMessage);
       }
     }
   }

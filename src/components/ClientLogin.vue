@@ -32,40 +32,34 @@ export default {
   data() {
     return {
       username: '',
-      password: ''
+      password: '' // Raw password
     };
   },
   methods: {
-    async hashPassword(password) {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(password);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    },
     async handleSubmit() {
-      const hashedPassword = await this.hashPassword(this.password);
-      
       const userData = {
         username: this.username,
-        password: hashedPassword
+        password: this.password // Send raw password
       };
-      
+
       console.log('Submitting user data:', userData);
 
       try {
-
-        const response = await axios.post(`${process.env.VUE_APP_ROOT_URL}/clientlogin`, userData, {
+        const response = await axios.post('http://localhost:5000/clientlogin', userData, {
           headers: {
             "Content-Type": "application/json"
           }
         });
 
-        alert(response.data.message); //success
+        // Success: Display a message or redirect
+        alert(response.data.message); // "Login successful"
 
+        // Redirect to UserSpace page
+        this.$router.push(`/userspace/${this.username}`);
       } catch (error) {
-        console.error('Error during login:', error); //fail
-        
+        console.error('Error during login:', error); // Log the error
+
+        // Handle different types of errors
         if (error.response) {
           alert('Login failed: ' + (error.response.data.message || 'An unexpected error occurred.'));
         } else if (error.request) {
@@ -74,7 +68,7 @@ export default {
           alert('Login failed: ' + error.message);
         }
       } finally {
-
+        // Reset the form fields
         this.username = '';
         this.password = '';
       }
@@ -82,6 +76,8 @@ export default {
   }
 };
 </script>
+
+
 
 <style scoped>
 .signup-page {
