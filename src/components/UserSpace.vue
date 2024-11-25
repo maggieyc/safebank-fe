@@ -3,7 +3,7 @@
     <div class="container">
       <div class="row">
         <div class="col-sm-12">
-          <h1>Accounts</h1>
+          <h1>User Accounts</h1>
           <hr />
           <br />
           <!-- Allert Message -->
@@ -15,15 +15,17 @@
           <button
             type="button"
             class="btn btn-success btn-sm"
-            v-b-modal.account-modal
+            v-b-modal.transfer-modal
           >
-            Create Account
+            Transfer
           </button>
           <br /><br />
+
+          <h2>Accounts</h2>
           <table class="table table-hover">
             <thead>
               <tr>
-                <th scope="col">Username </th>
+                <th scope="col">Username</th>
                 <th scope="col">Account Name</th>
                 <th scope="col">Account Number</th>
                 <th scope="col">Account Balance</th>
@@ -51,6 +53,7 @@
                     account.status
                   }}</span>
                 </td>
+
                 <td>
                   <div class="btn-group" role="group">
                     <button
@@ -99,83 +102,13 @@
             </tbody>
           </table>
 
-
           <footer class="text-center">
             Copyright &copy; All Rights Reserved.
           </footer>
         </div>
       </div>
-      <b-modal
-        ref="addAccountModal"
-        id="account-modal"
-        title="Create a new account"
-        hide-backdrop
-        hide-footer
-      >
-        <b-form @submit="onSubmit" class="w-100">
 
-          <b-form-group
-            id="form-name-group"
-            label="Username:"
-            label-for="form-username-input"
-          >
-            <b-form-input
-              id="form-username-input"
-              type="text"
-              v-model="createAccountForm.username"
-              placeholder="Username"
-              required
-            >
-            </b-form-input>
-          </b-form-group>
 
-          <b-form-group
-            id="form-name-group"
-            label="Account Name:"
-            label-for="form-name-input"
-          >
-            <b-form-input
-              id="form-name-input"
-              type="text"
-              v-model="createAccountForm.name"
-              placeholder="Account Name"
-              required
-            >
-            </b-form-input>
-          </b-form-group>
-          <b-form-group
-            id="form-currency-group"
-            label="Currency:"
-            label-for="form-currency-input"
-          >
-            <b-form-input
-              id="form-currency-input"
-              type="text"
-              v-model="createAccountForm.currency"
-              placeholder="$ or €"
-              required
-            >
-            </b-form-input>
-          </b-form-group>
-          <b-form-group
-            id="form-country-group"
-            label="Country:"
-            label-for="form-country-input"
-          >
-            <b-form-input
-              id="form-country-input"
-              type="text"
-              v-model="createAccountForm.country"
-              placeholder="Enter Country"
-              required
-            >
-            </b-form-input>
-          </b-form-group>
-
-          <b-button type="submit" variant="outline-info">Submit</b-button>
-        </b-form>
-      </b-modal>
-      <!-- End of Modal for Create Account-->
       <!-- Start of Modal for Edit Account-->
       <b-modal
         ref="editAccountModal"
@@ -218,6 +151,79 @@
         </b-form>
       </b-modal>
       <!-- End of Modal for Edit Account-->
+
+      <b-modal
+        ref="transferModal"
+        id="transfer-modal"
+        title="Transfer Money"
+        hide-backdrop
+        hide-footer
+      >
+        <b-form @submit="onSubmitTransfer" class="w-100">
+          <b-form-group
+            id="form-source-group"
+            label="Source Account Number:"
+            label-for="form-source-input"
+          >
+            <b-form-input
+              id="form-source-input"
+              type="text"
+              v-model="transfer.source"
+              placeholder="Source Account"
+              required
+            >
+            </b-form-input>
+          </b-form-group>
+
+          <b-form-group
+            id="form-Target-group"
+            label="Target Account Number:"
+            label-for="form-Target-input"
+          >
+            <b-form-input
+              id="form-Target-input"
+              type="text"
+              v-model="transfer.target"
+              placeholder="Target Account"
+              required
+            >
+            </b-form-input>
+          </b-form-group>
+
+          <b-form-group
+            id="form-currency-group"
+            label="Currency:"
+            label-for="form-currency-input"
+          >
+            <b-form-input
+              id="form-currency-input"
+              type="text"
+              v-model="transfer.currency"
+              placeholder="$ or €"
+              required
+            >
+            </b-form-input>
+          </b-form-group>
+
+          <b-form-group
+            id="form-amount-group"
+            label="Amount:"
+            label-for="form--input"
+          >
+            <b-form-input
+              id="form-amount-input"
+              type="text"
+              v-model="transfer.amount"
+              placeholder="Enter Amount"
+              required
+            >
+            </b-form-input>
+          </b-form-group>
+
+          <b-button type="submit" variant="outline-info">Submit</b-button>
+        </b-form>
+      </b-modal>
+      <!-- End of Modal for Transfer-->
     </div>
   </div>
 </template>
@@ -225,24 +231,25 @@
 <script>
 import axios from "axios";
 export default {
-  name: "AppAccounts",
+  name: "Account",
   data() {
     return {
+      username: this.$route.params.username,  // Accessing username from route params
       accounts: [],
       transactions: [],
-      createAccountForm: {
-        name: "",
+      showMessage: false,
+      message: "",
+      transfer:{
+        source: "",
+        target: "",
         currency: "",
-        country: "",
-        username: "",
+        amount: "",
       },
       editAccountForm: {
         id: "",
         name: "",
         country: "",
       },
-      showMessage: false,
-      message: "",
     };
   },
   methods: {
@@ -250,11 +257,9 @@ export default {
      * RESTful requests
      ***************************************************/
 
-
-    
-    //GET function
-    RESTgetAccounts() {
-      const path = `${process.env.VUE_APP_ROOT_URL}/accounts`;
+    //GET accounts function
+    RESTgetUserAccounts() {
+      const path = `${process.env.VUE_APP_ROOT_URL}/userspace/${this.username}/accounts`;
       axios
         .get(path)
         .then((response) => {
@@ -265,8 +270,9 @@ export default {
         });
     },
 
-    RESTgetTransactions() {
-      const path = `${process.env.VUE_APP_ROOT_URL}/transactions`;
+    //GET transactions function
+    RESTgetUserTransactions() {
+      const path = `${process.env.VUE_APP_ROOT_URL}/userspace/${this.username}/transactions`;
       axios
         .get(path)
         .then((response) => {
@@ -277,35 +283,13 @@ export default {
         });
     },
 
-    // POST function
-    RESTcreateAccount(payload) {
-      const path = `${process.env.VUE_APP_ROOT_URL}/accounts`;
-      axios
-        .post(path, payload)
-        .then((response) => {
-          this.RESTgetAccounts();
-          // For message alert
-          this.message = "Account Created succesfully!";
-          // To actually show the message
-          this.showMessage = true;
-          // To hide the message after 3 seconds
-          setTimeout(() => {
-            this.showMessage = false;
-          }, 3000);
-        })
-        .catch((error) => {
-          console.error(error);
-          this.RESTgetAccounts();
-        });
-    },
-
     // Update function
     RESTupdateAccount(payload, accountId) {
       const path = `${process.env.VUE_APP_ROOT_URL}/accounts/${accountId}`;
       axios
         .put(path, payload)
         .then((response) => {
-          this.RESTgetAccounts();
+          this.RESTgetUserAccounts();
           // For message alert
           this.message = "Account Updated succesfully!";
           // To actually show the message
@@ -317,7 +301,7 @@ export default {
         })
         .catch((error) => {
           console.error(error);
-          this.RESTgetAccounts();
+          this.RESTgetUserAccounts();
         });
     },
 
@@ -327,7 +311,7 @@ export default {
       axios
         .delete(path)
         .then((response) => {
-          this.RESTgetAccounts();
+          this.RESTgetUserAccounts();
           // For message alert
           this.message = "Account Deleted succesfully!";
           // To actually show the message
@@ -339,36 +323,43 @@ export default {
         })
         .catch((error) => {
           console.error(error);
-          this.RESTgetAccounts();
+          this.RESTgetUserAccounts();
         });
     },
 
-    /***************************************************
-     * FORM MANAGEMENT
-     * *************************************************/
+    // Transfer Money
+    RESTtransferMoney(payload){
+      const path = `${process.env.VUE_APP_ROOT_URL}/userspace/${this.username}/transfer`;
+      axios
+        .put(path, payload)
+        .then((response) => {
+          // show updated account
+          this.RESTgetUserAccounts();
+          this.RESTgetUserTransactions();
 
-    // Initialize forms empty
-    initForm() {
-      this.createAccountForm.name = "";
-      this.createAccountForm.currency = "";
-      this.createAccountForm.username = "";
-      this.editAccountForm.id = "";
-      this.editAccountForm.name = "";
-      this.editAccountForm.country = "";
-    },
+          // For message alert
+          this.message = "Transfer Made Successfuly!";
+          // To actually show the message
+          this.showMessage = true;
+          // To hide the message after 3 seconds
+          setTimeout(() => {
+            this.showMessage = false;
+          }, 3000);
+        })
+        .catch((error) => {
 
-    // Handle submit event for create account
-    onSubmit(e) {
-      e.preventDefault(); //prevent default form submit form the browser
-      this.$refs.addAccountModal.hide(); //hide the modal when submitted
-      const payload = {
-        name: this.createAccountForm.name,
-        currency: this.createAccountForm.currency,
-        username: this.createAccountForm.username,
-        country: this.createAccountForm.country,
-      };
-      this.RESTcreateAccount(payload);
-      this.initForm();
+          // For message alert
+          this.message = "Transfer Not Completed.";
+          // To actually show the message
+          this.showMessage = true;
+          // To hide the message after 3 seconds
+          setTimeout(() => {
+            this.showMessage = false;
+          }, 3000);
+
+          console.error(error);
+          this.RESTgetUserAccounts();
+        });
     },
 
     // Handle submit event for edit account
@@ -392,14 +383,39 @@ export default {
     deleteAccount(account) {
       this.RESTdeleteAccount(account.id);
     },
+
+    /***************************************************
+     * FORM MANAGEMENT
+     * *************************************************/
+
+    // Initialize forms empty
+    initForm() {
+      this.transfer.source = "";
+      this.transfer.target = "";
+      this.transfer.amount = "";
+      this.transfer.currency = "";
+      this.editAccountForm.id = "";
+      this.editAccountForm.name = "";
+      this.editAccountForm.country = "";
+    },
+
+    // Handle transfer form button
+    onSubmitTransfer(e) {
+      e.preventDefault(); //prevent default form submit form the browser
+      this.$refs.transferModal.hide(); //hide the modal when submitted
+
+      this.RESTtransferMoney(this.transfer);
+      this.initForm();
+    },
   },
 
   /***************************************************
    * LIFECYClE HOOKS
    ***************************************************/
   created() {
-    this.RESTgetAccounts();
-    this.RESTgetTransactions();
+    this.RESTgetUserAccounts(); 
+    this.RESTgetUserTransactions();
   },
 };
 </script>
+
