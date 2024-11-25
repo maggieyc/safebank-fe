@@ -52,7 +52,9 @@ export default {
           username: this.username,
           password: this.password
         };
-        const response = await axios.post('http://localhost:5000/users', userData);
+
+        const path = `${process.env.VUE_APP_ROOT_URL}/users`;
+        const response = await axios.post(path, userData);
 
         console.log('Signup response:', response.data);
         alert('Signup successful');
