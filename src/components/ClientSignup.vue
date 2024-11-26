@@ -31,6 +31,9 @@
 </template>
 
 <script>
+
+const API_BASE_URL = process.env.VUE_APP_API_BASE_URL;
+
 import axios from 'axios';
 export default {
   data() {
@@ -52,7 +55,13 @@ export default {
           username: this.username,
           password: this.password
         };
-        const response = await axios.post('http://localhost:5000/users', userData);
+
+        const response = await axios.post(`${API_BASE_URL}/users`, userData, {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+        /*const response = await axios.post('http://localhost:5000/users', userData);*/ /* Hardcoded for local */
 
         console.log('Signup response:', response.data);
         alert('Signup successful');
