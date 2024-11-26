@@ -328,7 +328,7 @@ export default {
         });
     },
 
-    // Transfer Money
+    // Transfer Money1
     RESTtransferMoney(payload) {
       const path = `${process.env.VUE_APP_API_BASE_URL}/userspace/${this.username}/transfer`;
       axios
