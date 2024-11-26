@@ -27,6 +27,9 @@
 </template>
 
 <script>
+
+const API_BASE_URL = process.env.VUE_APP_API_BASE_URL;
+
 import axios from 'axios';
 export default {
   data() {
@@ -45,8 +48,8 @@ export default {
       console.log('Submitting user data:', userData);
 
       try {
-        const path = `${process.env.VUE_APP_ROOT_URL}/clientlogin`;
-        const response = await axios.post(path, userData, {
+        const response = await axios.post(`${API_BASE_URL}/clientlogin`, userData, {
+
           headers: {
             "Content-Type": "application/json"
           }
