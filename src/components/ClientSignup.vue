@@ -10,6 +10,11 @@
         </div>
 
         <div class="form-group">
+          <label for="name">Country</label>
+          <input type="text" id="name" v-model="country" required />
+        </div>
+
+        <div class="form-group">
           <label for="password">Password</label>
           <input type="password" id="password" v-model="password" required />
         </div>
@@ -36,6 +41,7 @@ export default {
   data() {
     return {
       username: '',
+      country: '',
       password: '',
       repeatPassword: ''
     };
@@ -50,7 +56,8 @@ export default {
       try {
         const userData = {
           username: this.username,
-          password: this.password
+          password: this.password,
+          country: this.country,
         };
 
         const path = `${process.env.VUE_APP_ROOT_URL}/users`;
@@ -63,6 +70,7 @@ export default {
         this.username = '';
         this.password = '';
         this.repeatPassword = '';
+        this.country='';
 
         // Redirect to login page
         this.$router.push('/clientlogin');

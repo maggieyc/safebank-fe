@@ -19,7 +19,54 @@
           >
             Create Account
           </button>
+
+          <button
+            type="button"
+            class="btn btn-success btn-sm"
+            v-b-modal.user-modal
+          >
+            Create User
+          </button>
           <br /><br />
+
+          <h2>Users</h2>
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">Username</th>
+                <th scope="col">Country</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="user in users" :key="user.id">
+                <td>{{ user.username }}</td>
+                <td>{{ user.country }}</td>
+                <td>
+                  <div class="btn-group" role="group">
+                    <button
+                      type="button"
+                      class="btn btn-info btn-sm"
+                      v-b-modal.edit-user-modal
+                      @click="editUser(user)"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-danger btn-sm"
+                      @click="deleteUser(user)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+
+          <h2>Accounts</h2>
           <table class="table table-hover">
             <thead>
               <tr>
@@ -105,6 +152,8 @@
           </footer>
         </div>
       </div>
+
+      <!-- CREATE ACCOUNT MODAL -->
       <b-modal
         ref="addAccountModal"
         id="account-modal"
@@ -218,6 +267,96 @@
         </b-form>
       </b-modal>
       <!-- End of Modal for Edit Account-->
+
+      <!-- CREATE USER MODAL -->
+      <b-modal
+        ref="addUserModal"
+        id="user-modal"
+        title="Create a new user"
+        hide-backdrop
+        hide-footer
+      >
+        <b-form @submit="onSubmitUser" class="w-100">
+
+          <b-form-group
+            id="form-username-group"
+            label="Username:"
+            label-for="form-username-input"
+          >
+            <b-form-input
+              id="form-username-input"
+              type="text"
+              v-model="createUserForm.username"
+              placeholder="Username"
+              required
+            >
+            </b-form-input>
+          </b-form-group>
+
+          <b-form-group
+            id="form-password-group"
+            label="Password:"
+            label-for="form-password-input"
+          >
+            <b-form-input
+              id="form-password-input"
+              type="text"
+              v-model="createUserForm.password"
+              placeholder="Password"
+              required
+            >
+            </b-form-input>
+          </b-form-group>
+
+          <b-form-group
+            id="form-country-group"
+            label="Country:"
+            label-for="form-country-input"
+          >
+            <b-form-input
+              id="form-country-input"
+              type="text"
+              v-model="createUserForm.country"
+              placeholder="Enter Country"
+              required
+            >
+            </b-form-input>
+          </b-form-group>
+
+          <b-button type="submit" variant="outline-info">Submit</b-button>
+        </b-form>
+      </b-modal>
+      <!-- End of Modal for Create User-->
+
+      <!-- EDIT USER MODAL -->
+      <b-modal
+        ref="editUserModal"
+        id="edit-user-modal"
+        title="Edit the user"
+        hide-backdrop
+        hide-footer
+      >
+        <b-form @submit="onSubmitUpdateUser" class="w-100">
+          <b-form-group 
+            id="form-edit-country-group" 
+            label="Country:" 
+            label-for="form-edit-country-input"
+          >
+            <b-form-input
+              id="form-edit-country-input"
+              type="text"
+              v-model="editUserForm.country"
+              placeholder="Enter Country"
+              required
+            >
+            </b-form-input>
+          </b-form-group>
+
+          <b-button type="submit" variant="outline-info">Update</b-button>
+        </b-form>
+      </b-modal>
+      <!-- End of Modal for Edit User-->
+
     </div>
   </div>
 </template>
@@ -230,6 +369,7 @@ export default {
     return {
       accounts: [],
       transactions: [],
+      users: [],
       createAccountForm: {
         name: "",
         currency: "",
@@ -239,6 +379,15 @@ export default {
       editAccountForm: {
         id: "",
         name: "",
+        country: "",
+      },
+      createUserForm: {
+        username: "",
+        password: "",
+        country: "",
+      },
+      editUserForm: {
+        username: "",
         country: "",
       },
       showMessage: false,
@@ -277,6 +426,18 @@ export default {
         });
     },
 
+    RESTgetUsers() {
+      const path = `${process.env.VUE_APP_ROOT_URL}/users`;
+      axios
+        .get(path)
+        .then((response) => {
+          this.users = response.data.users;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+
     // POST function
     RESTcreateAccount(payload) {
       const path = `${process.env.VUE_APP_ROOT_URL}/accounts`;
@@ -296,6 +457,35 @@ export default {
         .catch((error) => {
           console.error(error);
           this.RESTgetAccounts();
+        });
+    },
+    // POST function
+    RESTcreateUser(payload) {
+      const path = `${process.env.VUE_APP_ROOT_URL}/users`;
+      axios
+        .post(path, payload)
+        .then((response) => {
+          this.RESTgetUsers();
+          // For message alert
+          this.message = "Account Created succesfully!";
+          // To actually show the message
+          this.showMessage = true;
+          // To hide the message after 3 seconds
+          setTimeout(() => {
+            this.showMessage = false;
+          }, 3000);
+        })
+        .catch((error) => {
+          console.error(error);
+          // For message alert
+          this.message = error;
+          // To actually show the message
+          this.showMessage = true;
+          // To hide the message after 3 seconds
+          setTimeout(() => {
+            this.showMessage = false;
+          }, 3000);
+          this.RESTgetUsers();
         });
     },
 
@@ -321,6 +511,28 @@ export default {
         });
     },
 
+    // Update function
+    RESTupdateUser(payload, username) {
+      const path = `${process.env.VUE_APP_ROOT_URL}/users/${username}`;
+      axios
+        .put(path, payload)
+        .then((response) => {
+          this.RESTgetUsers();
+          // For message alert
+          this.message = "User Updated succesfully!";
+          // To actually show the message
+          this.showMessage = true;
+          // To hide the message after 3 seconds
+          setTimeout(() => {
+            this.showMessage = false;
+          }, 3000);
+        })
+        .catch((error) => {
+          console.error(error);
+          this.RESTgetUsers();
+        });
+    },
+
     // Delete account
     RESTdeleteAccount(accountId) {
       const path = `${process.env.VUE_APP_ROOT_URL}/accounts/${accountId}`;
@@ -343,6 +555,30 @@ export default {
         });
     },
 
+    // Delete user
+    RESTdeleteUser(username) {
+      const path = `${process.env.VUE_APP_ROOT_URL}/users/${username}`;
+      axios
+        .delete(path)
+        .then((response) => {
+          this.RESTgetUsers();
+          this.RESTgetAccounts();
+          // For message alert
+          this.message = "User Deleted succesfully!";
+          // To actually show the message
+          this.showMessage = true;
+          // To hide the message after 3 seconds
+          setTimeout(() => {
+            this.showMessage = false;
+          }, 3000);
+        })
+        .catch((error) => {
+          console.error(error);
+          this.RESTgetUsers();
+          this.RESTgetAccounts();
+        });
+    },
+
     /***************************************************
      * FORM MANAGEMENT
      * *************************************************/
@@ -355,6 +591,10 @@ export default {
       this.editAccountForm.id = "";
       this.editAccountForm.name = "";
       this.editAccountForm.country = "";
+      this.createUserForm.username = "";
+      this.createUserForm.password = "";
+      this.createUserForm.country = "";
+      this.editUserForm.country = "";
     },
 
     // Handle submit event for create account
@@ -371,6 +611,20 @@ export default {
       this.initForm();
     },
 
+
+    // Handle submit event for create account
+    onSubmitUser(e) {
+      e.preventDefault(); //prevent default form submit form the browser
+      this.$refs.addUserModal.hide(); //hide the modal when submitted
+      const payload = {
+        username: this.createUserForm.username,
+        password: this.createUserForm.passwrod,
+        country: this.createUserForm.country,
+      };
+      this.RESTcreateUser(payload);
+      this.initForm();
+    },
+
     // Handle submit event for edit account
     onSubmitUpdate(e) {
       e.preventDefault(); //prevent default form submit form the browser
@@ -383,14 +637,35 @@ export default {
       this.initForm();
     },
 
+    // Handle submit event for edit account
+    onSubmitUpdateUser(e) {
+      e.preventDefault(); //prevent default form submit form the browser
+      this.$refs.editUserModal.hide(); //hide the modal when submitted
+      const payload = {
+        country: this.editUserForm.country,
+      };
+      this.RESTupdateUser(payload, this.editUserForm.username);
+      this.initForm();
+    },
+
     // Handle edit button
     editAccount(account) {
       this.editAccountForm = account;
     },
 
+    // Handle edit button
+    editUser(user) {
+      this.editUserForm = user;
+    },
+
     // Handle Delete button
     deleteAccount(account) {
       this.RESTdeleteAccount(account.id);
+    },
+
+    // Handle Delete button
+    deleteUser(user) {
+      this.RESTdeleteUser(user.username);
     },
   },
 
@@ -400,6 +675,7 @@ export default {
   created() {
     this.RESTgetAccounts();
     this.RESTgetTransactions();
+    this.RESTgetUsers();
   },
 };
 </script>
