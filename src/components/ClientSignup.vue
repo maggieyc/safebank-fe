@@ -22,10 +22,10 @@
         <button type="submit">Sign Up</button>
       </form>
 
-      <p class="login-link">
+      <div class="login-link">
         Already have an account? <a href="/clientlogin">Log in here.</a>
         <div class="back"> Go back to the <a href="/">Homepage</a>.</div>
-      </p>
+      </div>
     </div>
   </div>
 </template>
