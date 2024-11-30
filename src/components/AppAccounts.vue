@@ -466,6 +466,7 @@ export default {
         .post(path, payload)
         .then((response) => {
           this.RESTgetUsers();
+          this.RESTgetAccounts();
           // For message alert
           this.message = "Account Created succesfully!";
           // To actually show the message
@@ -486,6 +487,7 @@ export default {
             this.showMessage = false;
           }, 3000);
           this.RESTgetUsers();
+          this.RESTgetAccounts();
         });
     },
 
@@ -618,7 +620,7 @@ export default {
       this.$refs.addUserModal.hide(); //hide the modal when submitted
       const payload = {
         username: this.createUserForm.username,
-        password: this.createUserForm.passwrod,
+        password: this.createUserForm.password,
         country: this.createUserForm.country,
       };
       this.RESTcreateUser(payload);
