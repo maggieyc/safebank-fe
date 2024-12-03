@@ -17,15 +17,16 @@
         <button type="submit">Log in</button>
       </form>
 
-      <p>
+      <div>
         <div class = "back"> Go back to the <a href="/">Homepage</a>.</div>
-      </p>
+      </div>
 
     </div>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
 export default {
   data() {
     return {
@@ -42,20 +43,42 @@ export default {
       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     },
     async handleSubmit() {
-
-      const hashedPassword = await this.hashPassword(this.password);
-      
       const userData = {
         username: this.username,
-        password: hashedPassword
+        password: this.password // Send raw password
       };
-      
+
       console.log('Submitting user data:', userData);
 
-      this.username = '';
-      this.password = '';
-      
-      alert('Login successful');
+      try {
+        const path = `${process.env.VUE_APP_ROOT_URL}/adminlogin`;
+        const response = await axios.post(path, userData, {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+
+        // Success: Display a message or redirect
+        alert(response.data.message); // "Login successful"
+
+        // Redirect to UserSpace page
+        this.$router.push(`/accounts`);
+      } catch (error) {
+        console.error('Error during login:', error); // Log the error
+
+        // Handle different types of errors
+        if (error.response) {
+          alert('Login failed: ' + (error.response.data.message || 'An unexpected error occurred.'));
+        } else if (error.request) {
+          alert('Login failed: No response from server.');
+        } else {
+          alert('Login failed: ' + error.message);
+        }
+      } finally {
+        // Reset the form fields
+        this.username = '';
+        this.password = '';
+      }
     }
   }
 };

@@ -10,6 +10,11 @@
         </div>
 
         <div class="form-group">
+          <label for="name">Country</label>
+          <input type="text" id="name" v-model="country" required />
+        </div>
+
+        <div class="form-group">
           <label for="password">Password</label>
           <input type="password" id="password" v-model="password" required />
         </div>
@@ -22,10 +27,10 @@
         <button type="submit">Sign Up</button>
       </form>
 
-      <p class="login-link">
+      <div class="login-link">
         Already have an account? <a href="/clientlogin">Log in here.</a>
         <div class="back"> Go back to the <a href="/">Homepage</a>.</div>
-      </p>
+      </div>
     </div>
   </div>
 </template>
@@ -39,6 +44,7 @@ export default {
   data() {
     return {
       username: '',
+      country: '',
       password: '',
       repeatPassword: ''
     };
@@ -53,7 +59,8 @@ export default {
       try {
         const userData = {
           username: this.username,
-          password: this.password
+          password: this.password,
+          country: this.country,
         };
 
         const response = await axios.post(`${API_BASE_URL}/users`, userData, {
@@ -71,6 +78,7 @@ export default {
         this.username = '';
         this.password = '';
         this.repeatPassword = '';
+        this.country='';
 
         // Redirect to login page
         this.$router.push('/clientlogin');

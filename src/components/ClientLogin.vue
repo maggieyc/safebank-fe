@@ -17,10 +17,10 @@
         <button type="submit">Log in</button>
       </form>
 
-      <p class="signup-link">
+      <div class="signup-link">
         Don't have an account yet? <a href="/clientsignup">Sign up here.</a>
         <div class = "back"> Or go back to the <a href="/">Homepage</a>.</div>
-      </p>
+      </div>
 
     </div>
   </div>
