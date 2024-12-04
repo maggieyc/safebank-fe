@@ -8,6 +8,7 @@
           <li><router-link to="/clientlogin">Client Login</router-link></li>
           <li><router-link to="/clientsignup">Client Signup</router-link></li>
           <li><router-link to="/adminlogin">Admin Login</router-link></li>
+          <li><router-link to="/skull">Skull</router-link></li>
         </ul>
       </div>
     </header>
@@ -24,6 +25,7 @@
           <button class="action-btn1"><router-link to="/clientlogin">Client Login</router-link></button>
           <button class="action-btn1"><router-link to="/clientsignup">Client Signup</router-link></button>
           <button class="action-btn2"><router-link to="/adminlogin">Admin Login</router-link></button>
+          <button class="action-btn1"><router-link to="/skull">Skull</router-link></button>
         </div>
       </section>
     </main>
