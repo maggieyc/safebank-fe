@@ -17,16 +17,19 @@
         <button type="submit">Log in</button>
       </form>
 
-      <p class="signup-link">
+      <div class="signup-link">
         Don't have an account yet? <a href="/clientsignup">Sign up here.</a>
         <div class = "back"> Or go back to the <a href="/">Homepage</a>.</div>
-      </p>
+      </div>
 
     </div>
   </div>
 </template>
 
 <script>
+
+const API_BASE_URL = process.env.VUE_APP_ROOT_URL;
+
 import axios from 'axios';
 export default {
   data() {
@@ -45,8 +48,8 @@ export default {
       console.log('Submitting user data:', userData);
 
       try {
-        const path = `${process.env.VUE_APP_ROOT_URL}/clientlogin`;
-        const response = await axios.post(path, userData, {
+        const response = await axios.post(`${API_BASE_URL}/clientlogin`, userData, {
+
           headers: {
             "Content-Type": "application/json"
           }

@@ -259,7 +259,7 @@ export default {
 
     //GET accounts function
     RESTgetUserAccounts() {
-      const path = `${process.env.VUE_APP_ROOT_URL}/userspace/${this.username}/accounts`;
+      const path = `${process.env.VUE_APP_API_BASE_URL}/userspace/${this.username}/accounts`;
       axios
         .get(path)
         .then((response) => {
@@ -272,7 +272,7 @@ export default {
 
     //GET transactions function
     RESTgetUserTransactions() {
-      const path = `${process.env.VUE_APP_ROOT_URL}/userspace/${this.username}/transactions`;
+      const path = `${process.env.VUE_APP_API_BASE_URL}/accounts/${accountId}`;
       axios
         .get(path)
         .then((response) => {
@@ -283,9 +283,10 @@ export default {
         });
     },
 
+
     // Update function
     RESTupdateAccount(payload, accountId) {
-      const path = `${process.env.VUE_APP_ROOT_URL}/accounts/${accountId}`;
+      const path = `${process.env.VUE_APP_API_BASE_URL}/accounts/${accountId}`;
       axios
         .put(path, payload)
         .then((response) => {
@@ -307,7 +308,7 @@ export default {
 
     // Delete account
     RESTdeleteAccount(accountId) {
-      const path = `${process.env.VUE_APP_ROOT_URL}/accounts/${accountId}`;
+      const path = `${process.env.VUE_APP_API_BASE_URL}/accounts/${accountId}`;
       axios
         .delete(path)
         .then((response) => {
@@ -327,40 +328,27 @@ export default {
         });
     },
 
-    // Transfer Money
-    RESTtransferMoney(payload){
-      const path = `${process.env.VUE_APP_ROOT_URL}/userspace/${this.username}/transfer`;
+    // Transfer Money1
+    RESTtransferMoney(payload) {
+      const path = `${process.env.VUE_APP_API_BASE_URL}/userspace/${this.username}/transfer`;
       axios
         .put(path, payload)
         .then((response) => {
-          // show updated account
-          this.RESTgetUserAccounts();
-          this.RESTgetUserTransactions();
-
-          // For message alert
-          this.message = "Transfer Made Successfuly!";
-          // To actually show the message
-          this.showMessage = true;
-          // To hide the message after 3 seconds
-          setTimeout(() => {
-            this.showMessage = false;
-          }, 3000);
+          if (response.status === 200) {
+            // Refresh account and transaction data
+            this.RESTgetUserAccounts();
+            this.RESTgetUserTransactions();
+          } else {
+            console.error("Unexpected response:", response);
+          }
         })
         .catch((error) => {
-
-          // For message alert
-          this.message = "Transfer Not Completed.";
-          // To actually show the message
-          this.showMessage = true;
-          // To hide the message after 3 seconds
-          setTimeout(() => {
-            this.showMessage = false;
-          }, 3000);
-
-          console.error(error);
-          this.RESTgetUserAccounts();
+          console.error("Transfer Error:", error);
         });
     },
+
+
+
 
     // Handle submit event for edit account
     onSubmitUpdate(e) {
@@ -413,6 +401,7 @@ export default {
    * LIFECYClE HOOKS
    ***************************************************/
   created() {
+    console.log("API Base URL:", process.env.VUE_APP_API_BASE_URL);
     this.RESTgetUserAccounts(); 
     this.RESTgetUserTransactions();
   },

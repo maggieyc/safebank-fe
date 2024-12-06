@@ -10,6 +10,11 @@
         </div>
 
         <div class="form-group">
+          <label for="name">Country</label>
+          <input type="text" id="name" v-model="country" required />
+        </div>
+
+        <div class="form-group">
           <label for="password">Password</label>
           <input type="password" id="password" v-model="password" required />
         </div>
@@ -22,20 +27,24 @@
         <button type="submit">Sign Up</button>
       </form>
 
-      <p class="login-link">
+      <div class="login-link">
         Already have an account? <a href="/clientlogin">Log in here.</a>
         <div class="back"> Go back to the <a href="/">Homepage</a>.</div>
-      </p>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+
+const API_BASE_URL = process.env.VUE_APP_ROOT_URL;
+
 import axios from 'axios';
 export default {
   data() {
     return {
       username: '',
+      country: '',
       password: '',
       repeatPassword: ''
     };
@@ -50,11 +59,17 @@ export default {
       try {
         const userData = {
           username: this.username,
-          password: this.password
+          password: this.password,
+          country: this.country,
         };
 
-        const path = `${process.env.VUE_APP_ROOT_URL}/users`;
-        const response = await axios.post(path, userData);
+        const response = await axios.post(`${API_BASE_URL}/users`, userData, {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+        /*const response = await axios.post('http://localhost:5000/users', userData);*/ /* Hardcoded for local */
+
 
         console.log('Signup response:', response.data);
         alert('Signup successful');
@@ -63,6 +78,7 @@ export default {
         this.username = '';
         this.password = '';
         this.repeatPassword = '';
+        this.country='';
 
         // Redirect to login page
         this.$router.push('/clientlogin');
